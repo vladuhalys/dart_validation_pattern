@@ -29,7 +29,7 @@ class ValidatorChain<T> implements Validator<T> {
   @override
   ValidateState<String> validate(T value) {
     if (_nextValidator == null) {
-      return const ValidateSuccess<String>('success');
+      return const ValidateSuccess<String>('');
     }
     return _nextValidator!.validate(value);
   }
@@ -46,6 +46,21 @@ class ValidatorChain<T> implements Validator<T> {
   Validator<T> setNext(Validator<T> handler) {
     _nextValidator = handler;
     return _nextValidator!;
+  }
+}
+
+class ValidatorName extends ValidatorChain<String> {
+  @override
+  ValidateState<String> validate(String value) {
+    if (value.isEmpty) {
+      return const ValidateFailed<String>('Email is required');
+    }
+    if (!RegExp(
+            r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,253}[a-zA-Z0-9])?)*$")
+        .hasMatch(value)) {
+      return const ValidateFailed<String>('Email is invalid');
+    }
+    return super.validate(value);
   }
 }
 
@@ -78,7 +93,7 @@ class ValidatorPassword extends ValidatorChain<String> {
 }
 
 void main() {
-  String email = 'cccg@mail.com';
+  String email = 'ccc@gmail.com';
   String password = 'dwdwdwddwdwd';
   List<String> params = [];
   params.add(email);
@@ -92,7 +107,8 @@ void main() {
     var result = validatorChain[i].validate(params[i]);
     if (result is ValidateFailed) {
       print(result.error);
+    } else {
+      print('validate success');
     }
-    print(result.data);
   }
 }
